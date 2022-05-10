@@ -26,21 +26,32 @@ import gestisimal.exceptions.ArticleStockException;
 import gestisimal.exceptions.WarehouseArticleNotExistsException;
 
 
-/*
+/**
  * Clase Almacén que realice el alta, baja, modificación, entrada de mercancía (incrementa unidades), salida de mercancía (decrementa unidades).
  * El estado será un ArrayList de artículos (pero la clase no será un ArrayList)
  * Su comportamiento será: añadir artículos (no puede haber dos artículos con el mismo nombre y marca), eliminar artículos, 
  * incrementar las existencias de un artículo (se delega en la clase Artículo),  decrementar las existencias de un artículo 
  * (nunca por debajo de cero, se delega en la clase Artículo), devolver un artículo (para mostrarlo). Para  listar el almacén 
  * podría devolverse una cadena con todos los artículos del almacén (toString)
+ * 
+ * @author Jose Luis Perez Lara
  */
 public class Warehouse {
-  
+  /**
+   * Lista donde se almacenan los articulos a añadir.
+   */
   private List<Article> articles;
-  
+  /**
+   * Crea un nuevo almacen vacio.
+   */
   public Warehouse() {
     articles = new ArrayList<Article>();
   }
+  
+  /**
+   * Crea un nuevo almacen que se extrae de un fichero xml.
+   * @param route   Ruta del fichero xml donde se guarda el almacen.
+   */
   
   public Warehouse(String route) {
     try {
@@ -80,39 +91,80 @@ public class Warehouse {
       e.printStackTrace();
     }
   }
-  
+  /**
+   * Crea un nuevo almacen a partir de un ArrayList de articulos.
+   * @param articles    Array List con los articulos del almacen.
+   */
   Warehouse(ArrayList<Article> articles) {
     this.articles = new ArrayList<Article>(articles);
     
   }
-  
+  /**
+   * Añade un articulo al almacen, el articulo se crea internamente.
+   * @param name            Nombre del Articulo a añadir.
+   * @param brand           Marca del Articulo a añadir.
+   * @param buyingPrice     Precio de compra del Articulo a añadir.
+   * @param sellingPrice    Precio de venta del Articulo a añadir.
+   * @param units           Unidades del Articulo a añadir.
+   * @param securityStock   Stock de seguridad del Articulo a añadir.
+   * @param maxStock        Stock Maximo del Articulo a añadir.
+   * @throws WarehouseArticleRepeatedException      Si ya existe el articulo
+   */
   public void addArticle(String name, String brand, double buyingPrice, double sellingPrice, 
       int units, int securityStock, int maxStock) throws WarehouseArticleRepeatedException{
     Article aux = createArticle(name, brand, buyingPrice, sellingPrice, units, securityStock, maxStock);
     throwExceptionIfArticleToAddExits(aux.getCode());
     articles.add(aux);
   }
-
+  /**
+   * Añade un articulo al almacen, el articulo se crea internamente.
+   * @param name            Nombre del Articulo a añadir.
+   * @param brand           Marca del Articulo a añadir.
+   * @param buyingPrice     Precio de compra del Articulo a añadir.
+   * @param sellingPrice    Precio de venta del Articulo a añadir.
+   * @param units           Unidades del Articulo a añadir.
+   * @throws WarehouseArticleRepeatedException      Si ya existe el articulo.
+   */
   public void addArticle(String name, String brand, double buyingPrice, double sellingPrice, int units) throws WarehouseArticleRepeatedException{
     addArticle(name, brand, buyingPrice, sellingPrice, units, 0, 0);
   }
-  
+  /**
+   * Elimina un articulo del almacen.
+   * @param code    Codigo del articulo a eliminar.
+   * @throws WarehouseArticleNotExistsException     Si no existe el articulo.
+   */
   public void deleteArticle(int code) throws WarehouseArticleNotExistsException {
     throwExceptionIfArticleDoesNotExist(code);
     articles.removeIf(art -> art.getCode()==code);
   }
-  
+  /**
+   * Incrementa las unidades de un articulo 
+   * @param code    Codigo del articulo.
+   * @param units   Unidades a incrementar.
+   * @throws WarehouseArticleNotExistsException     Si no existe el articulo.
+   */
   public void incrementUnitsOfArticle(int code, int units) throws WarehouseArticleNotExistsException {
     throwExceptionIfArticleDoesNotExist(code);
     articles.get(code).increaseUnits(units);
   }
-  
+  /**
+   * Decrementa unidades de un articulo.
+   * @param code    Codigo del articulo.
+   * @param units   Unidades a decrementar
+   * @throws WarehouseArticleNotExistsException     Si no existe el articulo.
+   * @throws ArticleStockException                  Si el stock da error.
+   */
   public void decreaseUnitsOfArticle(int code, int units) throws WarehouseArticleNotExistsException, ArticleStockException{
     throwExceptionIfArticleDoesNotExist(code);
     throwExceptionIfArticleStockAreLessThanZero(code,units);
     articles.get(code).decreaseUnits(units);
   }
-
+  /**
+   * Devuelve el articulo en cuestion.
+   * @param code    Codigo del articulo en cuestion.
+   * @return        Articulo que tiene el codigo en cuestion.
+   * @throws WarehouseArticleNotExistsException     Si no existe el articulo.
+   */
   public Article returnArticle(int code) throws WarehouseArticleNotExistsException {
     throwExceptionIfArticleDoesNotExist(code);
     for (Article i : articles) {
@@ -127,7 +179,11 @@ public class Warehouse {
   public String toString() {
     return "Warehouse [articles=" + articles + "]";
   }
-
+  /**
+   * Comprueba si el articulo a añadir existe.
+   * @param code    Codigo del articulo a añadir.
+   * @throws WarehouseArticleRepeatedException      Si el articulo existe.
+   */
   private void throwExceptionIfArticleToAddExits(int code) throws WarehouseArticleRepeatedException {
     for(Article i : articles) {
       if (i.getCode()==code) {
@@ -135,13 +191,34 @@ public class Warehouse {
       }
     }
   }
-  
+  /**
+   * Crea un articulo provisional.
+   * @param name            Nombre del Articulo a añadir.
+   * @param brand           Marca del Articulo a añadir.
+   * @param buyingPrice     Precio de compra del Articulo a añadir.
+   * @param sellingPrice    Precio de venta del Articulo a añadir.
+   * @param units           Unidades del Articulo a añadir.
+   * @param securityStock   Stock de seguridad del Articulo a añadir.
+   * @param maxStock        Stock Maximo del Articulo a añadir.
+   * @return
+   */
   private Article createArticle(String name, String brand, double buyingPrice, double sellingPrice, 
       int units, int securityStock, int maxStock) {
     Article aux = new Article(name, brand, buyingPrice, sellingPrice, units, securityStock, maxStock);
     return aux;
   }
-  
+  /**
+   * Modifica el articulo deseado
+   * @param code
+   * @param newName
+   * @param newBrand
+   * @param newBuyingPrice
+   * @param newSellingPrice
+   * @param newUnits
+   * @param newSecurityStock
+   * @param newMaxStock
+   * @throws WarehouseArticleNotExistsException
+   */
   public void modifyArticle(int code, String newName, String newBrand, double newBuyingPrice, double newSellingPrice, 
       int newUnits, int newSecurityStock, int newMaxStock) throws WarehouseArticleNotExistsException {
     throwExceptionIfArticleDoesNotExist(code);
@@ -154,7 +231,11 @@ public class Warehouse {
     aux.setSecurityStock(newSecurityStock);
     aux.setMaxStock(newMaxStock);
   }
-  
+  /**
+   * Comprueba que el articulo no existe.
+   * @param code    Codigo del articulo.
+   * @throws WarehouseArticleNotExistsException     Si el articulo no existe.
+   */
   private void throwExceptionIfArticleDoesNotExist(int code) throws WarehouseArticleNotExistsException {
     for (Article i: articles) {
       if(i.getCode()==code) {
@@ -163,13 +244,21 @@ public class Warehouse {
     }
     throw new WarehouseArticleNotExistsException("El articulo no existe");
   }
-  
+  /**
+   * Comprueba si el stock de un articulo es negativo.
+   * @param code    Codigo el articulo.
+   * @param units   Unidades a eliminar.
+   * @throws ArticleStockException      Si las unidades son menores a 0
+   */
   private void throwExceptionIfArticleStockAreLessThanZero(int code, int units) throws ArticleStockException {
     if(articles.get(code).getUnits() - units < 0) {
       throw new ArticleStockException("El stock no puede ser inferior a 0");
     }
   }
-  
+  /**
+   * Guarda el almacen en un archivo xml
+   * @param fileName    Nombre del fichero
+   */
   public void save(String fileName) {
     try {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
