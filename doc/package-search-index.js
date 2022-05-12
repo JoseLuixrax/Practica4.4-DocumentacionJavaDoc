@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"gestisimal.classes"},{"l":"gestisimal.exceptions"},{"l":"gestisimal.tests"},{"l":"gestisimal.util"}];updateSearchResults();
